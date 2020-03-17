@@ -18,7 +18,7 @@ services:
       - db
     build: .
     ports: 
-      - 5000:5000
+      - 5001:5001
     volumes: 
       - ./conf:/prom/conf
       - ./:/app
