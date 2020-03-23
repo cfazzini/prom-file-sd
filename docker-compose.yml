@@ -14,11 +14,11 @@ services:
     volumes: 
       - ./mongo_data:/data/db
   api:
-    depends_on: 
+    depends_on:
       - db
-    build: .
-    ports: 
-      - 5001:5001
+    image: ci.arenadata.io/adcm_cluster_prometheus/prom-file-sd:v0.1
+    ports:
+      - 19216:19216
     volumes: 
       - ./conf:/prom/conf
       - ./:/app

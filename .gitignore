@@ -107,4 +107,6 @@ mongo_data
 prometheus_data
 targets.json
 
+conf/*.json
+
 .idea/

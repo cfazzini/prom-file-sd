@@ -3,15 +3,14 @@ from flask_restful import Resource, Api
 from flask_httpauth import HTTPBasicAuth
 from jsonschema import validate
 from pymongo import MongoClient
-from bson.objectid import ObjectId
 import json
 import os
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-MONGO_HOST = os.environ.get('MONGO_HOST', 'db')
-MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
+MONGO_HOST = os.environ.get('MONGO_HOST', '127.0.0.1')
+MONGO_PORT = int(os.environ.get('MONGO_PORT', 27017))
 DEFAULT_USER = os.environ.get('DEFAULT_USER', 'prometheus')
 DEFAULT_PASSWORD = os.environ.get('DEFAULT_PASSWORD', 'prometheus')
 
@@ -34,20 +33,13 @@ def unauthorized():
 
 
 schema = {
-     "type" : "object",
+     "type": "object",
      "properties": {
+         "exporter": {"type": "string"},
          "target": {"type": "string"},
          "labels": {"type": "object"}
      },
-     "required": ["target"]
-}
-
-delete_schema = {
-     "type": "object",
-     "properties" : {
-         "id": {"type": "string"},
-     },
-     "required": ["id"]
+     "required": ["exporter", "target"]
 }
 
 # class IndexPage(Resource):
@@ -63,8 +55,8 @@ class PromTargets(Resource):
         db = client.prom
         col = db.targets
         targets = []
-        for o in col.find():
-            targets.append({'target': o['target'], 'labels': o.get('labels', {}), 'id': str(o['_id'])})
+        for target in col.find():
+            targets.append({'exporter': target['exporter'], 'target': target['target'], 'labels': target.get('labels', {})})
         return {'targets': targets}
     
     def post(self):
@@ -80,28 +72,32 @@ class PromTargets(Resource):
         db = client.prom
         col = db.targets
         labels = body.get('labels', {})
-        doc = {
+        result = {
+            'exporter': body['exporter'],
             'target': body['target'],
             'labels': labels
         }
-        
-        sel = {
+        replace_proto = {
+            'exporter': body['exporter'],
             'target': body['target']
+        }
+        find_proto = {
+            'exporter': body['exporter']
         }
         metrics_path = labels.get('__metrics_path__')
         if metrics_path is not None:
-            sel['labels.__metrics_path__'] = metrics_path
+            replace_proto['labels.__metrics_path__'] = metrics_path
         else:
-            doc['labels']['__metrics_path__'] = '/metrics'
+            result['labels']['__metrics_path__'] = '/metrics'
         
-        col.replace_one(sel, doc, True)
-        with open('/prom/conf/targets.json', 'w') as f:
+        col.replace_one(replace_proto, result, True)
+        with open('/prom/conf/' + body['exporter'] + '.json', 'w') as f:
             targets = []
-            for o in col.find({}, projection={'_id': False}):
+            for target in col.find(find_proto, projection={'_id': False}):
                 targets.append(
                     {
-                        'targets': [o['target']],
-                        'labels': o.get('labels', {})
+                        'targets': [target['target']],
+                        'labels': target.get('labels', {})
                     }
                 )
     
@@ -110,13 +106,13 @@ class PromTargets(Resource):
             os.fsync(f.fileno())
         return {
             'status': 'created',
-            'data': doc
+            'data': result
         }, 201
 
     def delete(self):
         body = request.get_json()
         try:
-            validate(body, delete_schema)
+            validate(body, schema)
         except:
             return {
                     'message': 'Input data invalid or miss some value, required: {}'.format(schema['required'])
@@ -125,17 +121,21 @@ class PromTargets(Resource):
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client.prom
         col = db.targets
-        sel = {
-            '_id': ObjectId(body['id'])
+        delete_proto = {
+            'exporter': body['exporter'],
+            'target': body['target']
         }
-        col.delete_one(sel)
-        with open('/prom/conf/targets.json', 'w') as f:
+        find_proto = {
+            'exporter': body['exporter']
+        }
+        col.delete_one(delete_proto)
+        with open('/prom/conf/' + body['exporter'] + '.json', 'w') as f:
             targets = []
-            for o in col.find({}, projection={'_id': False}):
+            for target in col.find(find_proto, projection={'_id': False}):
                 targets.append(
                     {
-                        'targets': [o['target']],
-                        'labels': o.get('labels',{})
+                        'targets': [target['target']],
+                        'labels': target.get('labels', {})
                     }
                 )
     
