@@ -42,13 +42,23 @@ schema = {
      "required": ["exporter", "target"]
 }
 
-# class IndexPage(Resource):
+class IndexPage(Resource):
+    # return list of targets 
+    def get(self):
+    client = MongoClient(MONGO_HOST, MONGO_PORT)
+    db = client.prom
+    col = db.targets
+    targets = []
+    for target in col.find():
+        targets.append({'exporter': target['exporter'], 'target': target['target'], 'labels': target.get('labels', {})})
+    return {'targets': targets}
 #     def get(self):
 #         return {"message": "Need Web UI, Please add UI support https://github.com/narate/prom-file-sd"}
 
 
 class PromTargets(Resource):
-    decorators = [auth.login_required]
+    # disable auth for now
+    # decorators = [auth.login_required]
 
     def get(self):
         client = MongoClient(MONGO_HOST, MONGO_PORT)

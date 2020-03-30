@@ -1,13 +1,13 @@
 version: '3.7'
 services: 
-  prom:
-    image: quay.io/prometheus/prometheus
-    ports: 
-      - 9090:9090
-    volumes: 
-      - ./conf:/conf
-      - ./prometheus_data:/prometheus
-    command: ["--config.file=/conf/prometheus.yml", "--storage.tsdb.retention=30d", "--web.enable-lifecycle"]
+  # prom:
+  #   image: quay.io/prometheus/prometheus
+  #   ports: 
+  #     - 9090:9090
+  #   volumes: 
+  #     - ./conf:/conf
+  #     - ./prometheus_data:/prometheus
+  #   command: ["--config.file=/conf/prometheus.yml", "--storage.tsdb.retention=30d", "--web.enable-lifecycle"]
   db:
     image: mongo
     restart: always
@@ -16,7 +16,7 @@ services:
   api:
     depends_on:
       - db
-    image: ci.arenadata.io/adcm_cluster_prometheus/prom-file-sd:v0.1
+    image: prom-file-sd:latest
     ports:
       - 19216:19216
     volumes: 
