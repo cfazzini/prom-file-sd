@@ -1,5 +1,5 @@
 FROM python:alpine
-LABEL maintainer="Dmitry Kamovsky <kd@arenadata.io>"
+LABEL maintainer="Cory Fazzini <cfazzini@gmail.com>"
 WORKDIR /app
 ADD ./requirements.txt .
 RUN apk add --no-cache git && \
