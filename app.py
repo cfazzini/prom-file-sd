@@ -6,11 +6,13 @@ from pymongo import MongoClient
 import json
 import os
 from dotenv import load_dotenv
+# from tinydb import TinyDB, Query
+from tinymongo import TinyMongoClient
 
 load_dotenv(override=True)
 
-MONGO_HOST = os.environ.get('MONGO_HOST', '127.0.0.1')
-MONGO_PORT = int(os.environ.get('MONGO_PORT', 27017))
+# MONGO_HOST = os.environ.get('MONGO_HOST', '127.0.0.1')
+# MONGO_PORT = int(os.environ.get('MONGO_PORT', 27017))
 DEFAULT_USER = os.environ.get('DEFAULT_USER', 'prometheus')
 DEFAULT_PASSWORD = os.environ.get('DEFAULT_PASSWORD', 'prometheus')
 
@@ -43,9 +45,10 @@ schema = {
 }
 
 class IndexPage(Resource):
-    # return list of targets 
+    # return list of targets
     def get(self):
-    client = MongoClient(MONGO_HOST, MONGO_PORT)
+    # client = MongoClient(MONGO_HOST, MONGO_PORT)
+    client = TinyMongoClient()
     db = client.prom
     col = db.targets
     targets = []
@@ -61,7 +64,8 @@ class PromTargets(Resource):
     # decorators = [auth.login_required]
 
     def get(self):
-        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        # client = MongoClient(MONGO_HOST, MONGO_PORT)
+        client = TinyMongoClient()
         db = client.prom
         col = db.targets
         targets = []
@@ -78,7 +82,8 @@ class PromTargets(Resource):
                     'message': 'Input data invalid or miss some value, required: {}'.format(schema['required'])
                 }, 400
         
-        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        # client = MongoClient(MONGO_HOST, MONGO_PORT)
+        client = TinyMongoClient()
         db = client.prom
         col = db.targets
         labels = body.get('labels', {})
@@ -128,7 +133,8 @@ class PromTargets(Resource):
                     'message': 'Input data invalid or miss some value, required: {}'.format(schema['required'])
                 }, 400
         
-        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        # client = MongoClient(MONGO_HOST, MONGO_PORT)
+        client = TinyMongoClient()
         db = client.prom
         col = db.targets
         delete_proto = {
