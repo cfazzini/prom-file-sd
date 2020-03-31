@@ -8,14 +8,14 @@ services:
   #     - ./conf:/conf
   #     - ./prometheus_data:/prometheus
   #   command: ["--config.file=/conf/prometheus.yml", "--storage.tsdb.retention=30d", "--web.enable-lifecycle"]
-  db:
-    image: mongo
-    restart: always
-    volumes: 
-      - ./mongo_data:/data/db
+  # db:
+  #   image: mongo
+  #   restart: always
+  #   volumes: 
+  #     - ./mongo_data:/data/db
   api:
-    depends_on:
-      - db
+    # depends_on:
+      # - db
     image: prom-file-sd:latest
     ports:
       - 19216:19216

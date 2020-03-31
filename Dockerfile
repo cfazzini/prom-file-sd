@@ -2,7 +2,7 @@ FROM python:alpine
 LABEL maintainer="Dmitry Kamovsky <kd@arenadata.io>"
 WORKDIR /app
 ADD ./requirements.txt .
-RUN apk add --no-cache git
+RUN apk add --no-cache git && \
     pip install -r requirements.txt && \
     pip install -e git+https://github.com/schapman1974/tinymongo.git#egg=tinymongo
 ADD ./app.py .

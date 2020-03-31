@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, make_response
 from flask_restful import Resource, Api
 from flask_httpauth import HTTPBasicAuth
 from jsonschema import validate
-from pymongo import MongoClient
+# from pymongo import MongoClient
 import json
 import os
 from dotenv import load_dotenv
@@ -48,13 +48,13 @@ class IndexPage(Resource):
     # return list of targets
     def get(self):
     # client = MongoClient(MONGO_HOST, MONGO_PORT)
-    client = TinyMongoClient()
-    db = client.prom
-    col = db.targets
-    targets = []
-    for target in col.find():
-        targets.append({'exporter': target['exporter'], 'target': target['target'], 'labels': target.get('labels', {})})
-    return {'targets': targets}
+        client = TinyMongoClient()
+        db = client.prom
+        col = db.targets
+        targets = []
+        for target in col.find():
+            targets.append({'exporter': target['exporter'], 'target': target['target'], 'labels': target.get('labels', {})})
+        return {'targets': targets}
 #     def get(self):
 #         return {"message": "Need Web UI, Please add UI support https://github.com/narate/prom-file-sd"}
 
